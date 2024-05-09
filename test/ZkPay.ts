@@ -35,5 +35,15 @@ describe("ZkPay", function () {
       expect(depositAmt).to.equal(1_000_000n)
     });
 
+    it("Should not deposit more than allowance", async function () {
+      const { usdc, zkpay, deployer } = await loadFixture(deployZkPayFixture);
+
+      let zkpayAddress = await zkpay.getAddress();
+      await usdc.connect(deployer).approve(zkpayAddress,2_000_000 );
+      let msg = await zkpay.depositERC20(0,1,1,3_000_000).catch(e => e); 
+      // TODO: use expect().to.be.revertedWith();
+      expect(msg.toString().includes('allowance insufficient')).to.be.true;
+    })
+
   });
 });
