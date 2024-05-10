@@ -3,21 +3,11 @@ pragma solidity ^0.8.24;
 
 import "./interfaces/IERC20.sol";
 import "./libraries/Address.sol";
-contract ZkPay {
+import "./components/MainStorage.sol";
+
+
+contract ZkPay is MainStorage {
     using Addresses for address;
-
-    address tokenAddress;
-    uint8 accountTreeHeight = 32; // NOLINT: constable-states uninitialized-state.
-
-    // Pending deposits.
-    // A map asset id => account id => quantized amount.
-    mapping(uint256 => mapping(uint256 => uint256)) pendingDeposits;
-    // Pending withdrawals.
-    // A map asset id => account id => quantized amount.
-    mapping(uint256 => mapping(uint256 => uint256)) pendingWithdrawals;
-
-    // Mapping from accountId to the Ethereum public key of its owner.
-    mapping(uint256 => address) ethKeys; // NOLINT: uninitialized-state.
 
     event LogDeposit(
         address depositorEthKey,
