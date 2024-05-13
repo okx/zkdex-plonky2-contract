@@ -2,12 +2,27 @@
 pragma solidity ^0.8.24;
 
 import "./interfaces/IERC20.sol";
+import "./interfaces/IGroth16Verifier.sol";
 import "./libraries/Address.sol";
 import "./components/MainStorage.sol";
+import "./components/Freezable.sol";
 
-
-contract ZkPay is MainStorage {
+contract ZkPay is MainStorage, Freezable  {
     using Addresses for address;
+
+    modifier onlyOperator() {
+        require(operators[msg.sender], "ONLY_OPERATOR");
+        _;
+    }
+
+    struct Modification {
+        uint64 accountId;
+        uint64 assetId;
+        int128 biasedDelta;
+    }
+
+    event LogStateUpdate(uint256 batchId, uint256 vaultRoot);
+
 
     event LogDeposit(
         address depositorEthKey,
@@ -17,21 +32,25 @@ contract ZkPay is MainStorage {
     );
 
     event LogAssetWithdrawalAllowed(
-        uint256 accountId,
-        uint256 assetId,
+        uint64 accountId,
+        uint64 assetId,
         uint256 quantizedAmount
     );
 
     event LogWithdrawalPerformed(
-        uint256 accountId,
-        uint256 assetId,
+        uint64 accountId,
+        uint64 assetId,
         uint256 quantizedAmount,
         address recipient
     );
 
     /// fix to one token for demo
-    constructor(address _tokenAddress) {
+    constructor(
+        address _tokenAddress,
+        address _groth16VerifierAddress
+        ) {
         tokenAddress = _tokenAddress;
+        groth16VerifierAddress = _groth16VerifierAddress;
     }
 
     /// @notice deposit ERC20 token
@@ -51,10 +70,9 @@ contract ZkPay is MainStorage {
 
     /// @notice Transfers funds from the on-chain deposit area to the off-chain area.
     function acceptDeposit(
-        uint256 ownerKey,
-        uint256 accountId,
-        uint256 assetId,
-        uint256 quantizedAmount
+        uint64 accountId,
+        uint64 assetId,
+        uint128 quantizedAmount
     ) internal {
         // Fetch deposit.
         require(
@@ -75,15 +93,15 @@ contract ZkPay is MainStorage {
 
     /// @notice Verifier authorizes withdrawal.
     function acceptWithdrawal(
-        uint256 accountId,
-        uint256 assetId,
-        uint256 quantizedAmount
+        uint64 accountId,
+        uint64 assetId,
+        uint128 quantizedAmount
     ) internal virtual {
         allowWithdrawal(accountId, assetId, quantizedAmount);
     }
 
     /// @notice Moves funds from the pending withdrawal account to the owner address.
-    function withdraw(uint256 accountId, uint256 assetId) external {
+    function withdraw(uint64 accountId, uint64 assetId) external {
         withdrawInternal(accountId, assetId);
     }
 
@@ -123,8 +141,8 @@ contract ZkPay is MainStorage {
 
     /// @notice Transfers funds from the off-chain area to the on-chain withdrawal area.
     function allowWithdrawal(
-        uint256 accountId,
-        uint256 assetId,
+        uint64 accountId,
+        uint64 assetId,
         uint256 quantizedAmount
     ) internal {
         // Fetch withdrawal.
@@ -138,6 +156,63 @@ contract ZkPay is MainStorage {
         pendingWithdrawals[assetId][accountId] = withdrawal;
 
         emit LogAssetWithdrawalAllowed(accountId, assetId, quantizedAmount);
+    }
+
+    /// @notice update zk pay shared state
+    function updateState(
+        uint[2] calldata _pA,
+        uint[2][2] calldata _pB,
+        uint[2] calldata _pC,
+        uint[196] calldata _pubSignals,
+        uint256[] calldata publicInput, // TODO: to be extracted from _pubSignals
+        Modification[] calldata modifications
+    ) external virtual notFrozen onlyOperator {
+        require(publicInput.length >= 4, "incorrect publicInput length");
+        // updateStateInternal(publicInput, applicationData, false);
+        require(
+            IGroth16Verifier(groth16VerifierAddress).verifyProof(_pA, _pB, _pC, _pubSignals),
+            "groth16 verification fail"
+        );
+
+        rootUpdate(
+            publicInput[PUB_IN_BATCHID_OFFSET],
+            publicInput[PUB_IN_VALIDIUM_VAULT_ROOT_AFTER_OFFSET]
+        );
+
+        performModification(
+            modifications,
+            bytes32(publicInput[PUB_IN_MODIFICATION_HASH_OFFSET])
+        );
+    }
+
+    function rootUpdate(
+        uint256 _batchId,
+        uint256 newValidiumVaultRoot
+    ) internal virtual {
+        // Update state.
+        validiumVaultRoot = newValidiumVaultRoot;
+        batchId = _batchId;
+
+        // Log update.
+        emit LogStateUpdate(batchId, validiumVaultRoot);
+    }
+
+    function performModification(
+        Modification[] memory modifications,
+        bytes32 modificationHash
+    ) public returns (bytes32 requestHash) {
+        uint256 nModifications = modifications.length;
+
+        bytes32 requestHash = keccak256(abi.encode(modifications));
+        require(requestHash == modificationHash, "modification hash not match");
+
+        for (uint256 i = 0; i < nModifications; i++) {
+            if(modifications[i].biasedDelta > 0 ){
+                acceptDeposit(modifications[i].accountId, modifications[i].assetId, uint128(modifications[i].biasedDelta));
+            } else {
+               acceptWithdrawal(modifications[i].accountId, modifications[i].assetId, uint128(-modifications[i].biasedDelta));
+            }
+        }
     }
 
     /// @notice Transfers funds from msg.sender to the exchange.
@@ -188,7 +263,7 @@ contract ZkPay is MainStorage {
     }
 
     // internal function
-    function withdrawInternal(uint256 accountId, uint256 assetId) internal {
+    function withdrawInternal(uint64 accountId, uint64 assetId) internal {
         address recipient = strictGetEthKey(accountId);
         // Fetch and clear quantized amount.
         uint256 quantizedAmount = pendingWithdrawals[accountId][assetId];
