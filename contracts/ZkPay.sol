@@ -7,7 +7,7 @@ import "./libraries/Address.sol";
 import "./components/MainStorage.sol";
 import "./components/Freezable.sol";
 
-contract ZkPay is MainStorage, Freezable  {
+contract ZkPay is MainStorage, Freezable {
     using Addresses for address;
 
     modifier onlyOperator() {
@@ -22,7 +22,6 @@ contract ZkPay is MainStorage, Freezable  {
     }
 
     event LogStateUpdate(uint256 batchId, uint256 vaultRoot);
-
 
     event LogDeposit(
         address depositorEthKey,
@@ -47,10 +46,12 @@ contract ZkPay is MainStorage, Freezable  {
     /// fix to one token for demo
     constructor(
         address _tokenAddress,
-        address _groth16VerifierAddress
-        ) {
+        address _groth16VerifierAddress,
+        address _operator
+    ) {
         tokenAddress = _tokenAddress;
         groth16VerifierAddress = _groth16VerifierAddress;
+        operators[_operator] = true;
     }
 
     /// @notice deposit ERC20 token
@@ -168,9 +169,13 @@ contract ZkPay is MainStorage, Freezable  {
         Modification[] calldata modifications
     ) external virtual notFrozen onlyOperator {
         require(publicInput.length >= 4, "incorrect publicInput length");
-        // updateStateInternal(publicInput, applicationData, false);
         require(
-            IGroth16Verifier(groth16VerifierAddress).verifyProof(_pA, _pB, _pC, _pubSignals),
+            IGroth16Verifier(groth16VerifierAddress).verifyProof(
+                _pA,
+                _pB,
+                _pC,
+                _pubSignals
+            ),
             "groth16 verification fail"
         );
 
@@ -207,10 +212,18 @@ contract ZkPay is MainStorage, Freezable  {
         require(requestHash == modificationHash, "modification hash not match");
 
         for (uint256 i = 0; i < nModifications; i++) {
-            if(modifications[i].biasedDelta > 0 ){
-                acceptDeposit(modifications[i].accountId, modifications[i].assetId, uint128(modifications[i].biasedDelta));
+            if (modifications[i].biasedDelta > 0) {
+                acceptDeposit(
+                    modifications[i].accountId,
+                    modifications[i].assetId,
+                    uint128(modifications[i].biasedDelta)
+                );
             } else {
-               acceptWithdrawal(modifications[i].accountId, modifications[i].assetId, uint128(-modifications[i].biasedDelta));
+                acceptWithdrawal(
+                    modifications[i].accountId,
+                    modifications[i].assetId,
+                    uint128(-modifications[i].biasedDelta)
+                );
             }
         }
     }
