@@ -4,6 +4,15 @@ pragma solidity ^0.8.24;
 contract MainStorage {
     address tokenAddress;
 
+    // The following constants are offsets of data expected in the public input.
+    uint256 internal constant PUB_IN_BATCHID_OFFSET = 0;
+    uint256 internal constant PUB_IN_VALIDIUM_VAULT_ROOT_BEFORE_OFFSET = 1;
+    uint256 internal constant PUB_IN_VALIDIUM_VAULT_ROOT_AFTER_OFFSET = 2;
+
+    // Governance
+    // True if and only if the address is an operator (allowed to update state).
+    mapping(address => bool) operators; // NOLINT: uninitialized-state.
+
     bool stateFrozen; // NOLINT: constable-states.
     // Time when unFreeze can be successfully called (UNFREEZE_DELAY after freeze).
     uint256 unFreezeTime; // NOLINT: constable-states.
@@ -34,4 +43,11 @@ contract MainStorage {
 
     // Counter of forced action request in block. The key is the block number.
     mapping(uint256 => uint256) forcedRequestsInBlock;
+
+    //** State ****************************************** */
+    uint256 batchId;
+    // Validium Vaults Tree Root & Height.
+    uint256 validiumVaultRoot; // NOLINT: constable-states uninitialized-state.
+    uint256 validiumTreeHeight; // NOLINT: constable-states uninitialized-state.
+    //* ************************************************* */
 }
