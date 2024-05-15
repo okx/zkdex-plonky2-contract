@@ -164,7 +164,7 @@ contract ZkPay is MainStorage, Freezable {
         uint[2] calldata _pA,
         uint[2][2] calldata _pB,
         uint[2] calldata _pC,
-        uint[196] calldata _pubSignals,
+        uint[178] calldata _pubSignals,
         uint256[] calldata publicInput, // TODO: to be extracted from _pubSignals
         Modification[] calldata modifications
     ) external virtual notFrozen onlyOperator {
