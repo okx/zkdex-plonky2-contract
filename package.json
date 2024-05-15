@@ -1,5 +1,5 @@
 {
-  "name": "zkdex-plonky2-contract",
+  "name": "zkpay-plonky2-contract",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -14,14 +14,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/okx/zkdex-plonky2-contract.git"
+    "url": "git+https://github.com/okx/zkpay-plonky2-contract.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/okx/zkdex-plonky2-contract/issues"
+    "url": "https://github.com/okx/zkpay-plonky2-contract/issues"
   },
-  "homepage": "https://github.com/okx/zkdex-plonky2-contract#readme",
+  "homepage": "https://github.com/okx/zkpay-plonky2-contract#readme",
   "devDependencies": {
     "@nomicfoundation/hardhat-chai-matchers": "^2.0.6",
     "@nomicfoundation/hardhat-ethers": "^3.0.5",
@@ -31,6 +31,7 @@
     "@nomicfoundation/hardhat-toolbox": "^5.0.0",
     "@nomicfoundation/hardhat-verify": "^2.0.6",
     "@nomicfoundation/ignition-core": "^0.15.2",
+    "@nomiclabs/hardhat-etherscan": "^3.1.2",
     "@openzeppelin/contracts": "^5.0.2",
     "@typechain/ethers-v6": "^0.5.1",
     "@typechain/hardhat": "^9.1.0",
