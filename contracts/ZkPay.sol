@@ -16,24 +16,24 @@ contract ZkPay is MainStorage, Freezable {
     }
 
     struct Modification {
-        uint64 accountId;
-        uint64 assetId;
-        int128 biasedDelta;
+        uint32 accountId;
+        uint32 assetId;
+        int64 biasedDelta;
     }
 
     event LogStateUpdate(uint256 batchId, uint256 vaultRoot);
 
     event LogDeposit(
         address depositorEthKey,
-        uint256 accountId,
-        uint256 assetId,
-        uint256 quantizedAmount
+        uint32 accountId,
+        uint32 assetId,
+        uint64 quantizedAmount
     );
 
     event LogAssetWithdrawalAllowed(
-        uint64 accountId,
-        uint64 assetId,
-        uint256 quantizedAmount
+        uint32 accountId,
+        uint32 assetId,
+        uint64 quantizedAmount
     );
 
     event LogWithdrawalPerformed(
@@ -62,18 +62,18 @@ contract ZkPay is MainStorage, Freezable {
     /// @param quantizedAmount For ERC-20 and ERC-1155, the amount to be deposited.
     function depositERC20(
         uint256 ownerKey,
-        uint256 assetId,
-        uint256 accountId,
-        uint256 quantizedAmount
+        uint32 assetId,
+        uint32 accountId,
+        uint64 quantizedAmount
     ) public {
         deposit(ownerKey, assetId, accountId, quantizedAmount);
     }
 
     /// @notice Transfers funds from the on-chain deposit area to the off-chain area.
     function acceptDeposit(
-        uint64 accountId,
-        uint64 assetId,
-        uint128 quantizedAmount
+        uint32 accountId,
+        uint32 assetId,
+        uint64 quantizedAmount
     ) internal {
         // Fetch deposit.
         require(
@@ -86,31 +86,31 @@ contract ZkPay is MainStorage, Freezable {
     }
 
     function getDepositBalance(
-        uint256 accountId,
-        uint256 assetId
+        uint32 accountId,
+        uint32 assetId
     ) external view returns (uint256) {
         return pendingDeposits[assetId][accountId];
     }
 
     /// @notice Verifier authorizes withdrawal.
     function acceptWithdrawal(
-        uint64 accountId,
-        uint64 assetId,
-        uint128 quantizedAmount
+        uint32 accountId,
+        uint32 assetId,
+        uint64 quantizedAmount
     ) internal virtual {
         allowWithdrawal(accountId, assetId, quantizedAmount);
     }
 
     /// @notice Moves funds from the pending withdrawal account to the owner address.
-    function withdraw(uint64 accountId, uint64 assetId) external {
+    function withdraw(uint32 accountId, uint32 assetId) external {
         withdrawInternal(accountId, assetId);
     }
 
     function deposit(
         uint256 ownerKey,
-        uint256 assetId,
-        uint256 accountId,
-        uint256 quantizedAmount
+        uint32 assetId,
+        uint32 accountId,
+        uint64 quantizedAmount
     ) public {
         require(accountId < 2 ** accountTreeHeight, "VAULT_ID_OUT_RANGE");
 
@@ -118,7 +118,7 @@ contract ZkPay is MainStorage, Freezable {
         depositStateUpdate(ownerKey, assetId, accountId, quantizedAmount);
 
         // Transfer the tokens to the Deposit contract.
-        transferIn(assetId, quantizedAmount);
+        transferIn(assetId, uint256(quantizedAmount));
 
         // Log event.
         emit LogDeposit(msg.sender, accountId, assetId, quantizedAmount);
@@ -126,12 +126,12 @@ contract ZkPay is MainStorage, Freezable {
 
     function depositStateUpdate(
         uint256 ownerKey,
-        uint256 assetId,
-        uint256 accountId,
-        uint256 quantizedAmount
+        uint32 assetId,
+        uint32 accountId,
+        uint64 quantizedAmount
     ) private returns (uint256) {
         // Checks for overflow and updates the pendingDeposits balance.
-        uint256 vaultBalance = pendingDeposits[assetId][accountId];
+        uint64 vaultBalance = pendingDeposits[assetId][accountId];
         vaultBalance += quantizedAmount;
         require(vaultBalance >= quantizedAmount, "DEPOSIT_OVERFLOW");
         pendingDeposits[assetId][accountId] = vaultBalance;
@@ -142,12 +142,12 @@ contract ZkPay is MainStorage, Freezable {
 
     /// @notice Transfers funds from the off-chain area to the on-chain withdrawal area.
     function allowWithdrawal(
-        uint64 accountId,
-        uint64 assetId,
-        uint256 quantizedAmount
+        uint32 accountId,
+        uint32 assetId,
+        uint64 quantizedAmount
     ) internal {
         // Fetch withdrawal.
-        uint256 withdrawal = pendingWithdrawals[assetId][accountId];
+        uint64 withdrawal = pendingWithdrawals[assetId][accountId];
 
         // Add accepted quantized amount.
         withdrawal += quantizedAmount;
@@ -216,13 +216,13 @@ contract ZkPay is MainStorage, Freezable {
                 acceptDeposit(
                     modifications[i].accountId,
                     modifications[i].assetId,
-                    uint128(modifications[i].biasedDelta)
+                    uint64(modifications[i].biasedDelta)
                 );
             } else {
                 acceptWithdrawal(
                     modifications[i].accountId,
                     modifications[i].assetId,
-                    uint128(-modifications[i].biasedDelta)
+                    uint64(-modifications[i].biasedDelta)
                 );
             }
         }
@@ -276,7 +276,7 @@ contract ZkPay is MainStorage, Freezable {
     }
 
     // internal function
-    function withdrawInternal(uint64 accountId, uint64 assetId) internal {
+    function withdrawInternal(uint32 accountId, uint32 assetId) internal {
         address recipient = strictGetEthKey(accountId);
         // Fetch and clear quantized amount.
         uint256 quantizedAmount = pendingWithdrawals[accountId][assetId];
@@ -293,7 +293,7 @@ contract ZkPay is MainStorage, Freezable {
     }
 
     /// @notice Returns the Ethereum public key (address) that owns the given accountId.
-    function getEthKey(uint256 accountId) public view returns (address) {
+    function getEthKey(uint32 accountId) public view returns (address) {
         address registeredEth = ethKeys[accountId];
 
         if (registeredEth != address(0x0)) {
@@ -305,7 +305,7 @@ contract ZkPay is MainStorage, Freezable {
 
     /// @notice Same as getEthKey, but fails when a jubjub key is not registered.
     function strictGetEthKey(
-        uint256 accountId
+        uint32 accountId
     ) internal view returns (address ethKey) {
         ethKey = getEthKey(accountId);
         require(ethKey != address(0x0), "USER_UNREGISTERED");

@@ -29,13 +29,13 @@ contract MainStorage {
 
     // Pending deposits.
     // A map asset id => account id => quantized amount.
-    mapping(uint256 => mapping(uint256 => uint256)) pendingDeposits;
+    mapping(uint32 => mapping(uint32 => uint64)) pendingDeposits;
     // Pending withdrawals.
     // A map asset id => account id => quantized amount.
-    mapping(uint256 => mapping(uint256 => uint256)) pendingWithdrawals;
+    mapping(uint32 => mapping(uint32 => uint64)) pendingWithdrawals;
 
     // Mapping from accountId to the Ethereum public key of its owner.
-    mapping(uint256 => address) ethKeys; // NOLINT: uninitialized-state.
+    mapping(uint32 => address) ethKeys; // NOLINT: uninitialized-state.
 
     // ForcedAction requests: actionHash => requested block time.
     mapping(bytes32 => uint256) forcedActionRequests;
