@@ -208,7 +208,7 @@ contract ZkPay is MainStorage, Freezable {
     ) public returns (bytes32 requestHash) {
         uint256 nModifications = modifications.length;
 
-        bytes32 requestHash = keccak256(abi.encode(modifications));
+        bytes32 requestHash = hashModifications(modifications);
         require(requestHash == modificationHash, "modification hash not match");
 
         for (uint256 i = 0; i < nModifications; i++) {
