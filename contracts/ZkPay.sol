@@ -228,6 +228,32 @@ contract ZkPay is MainStorage, Freezable {
         }
     }
 
+    function modificationToUint256(
+        Modification memory modification
+    ) public pure returns (uint256) {
+        uint256 result = uint256(modification.accountId);
+        result = (result << 32) | uint256(modification.assetId);
+        result = (result << 64) | uint256(uint64(modification.biasedDelta));
+        return result;
+    }
+
+    function hashModifications(
+        Modification[] memory modifications
+    ) public pure returns (bytes32) {
+        uint256 nModifications = modifications.length;
+
+        uint256[] memory mod_hashs =  new uint256[](nModifications);
+        for (uint i = 0; i < nModifications; i++) {
+            mod_hashs[i] = modificationToUint256(modifications[i]);
+        }
+        bytes memory result = abi.encodePacked(mod_hashs);
+
+        bytes32 requestHash = keccak256(
+           result
+        );
+        return requestHash;
+    }
+
     /// @notice Transfers funds from msg.sender to the exchange.
     function transferIn(uint256 assetId, uint256 quantizedAmount) internal {
         if (quantizedAmount == 0) return;
