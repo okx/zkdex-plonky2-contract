@@ -20,7 +20,7 @@ describe("zkpay", function () {
 
     const usdc = await UsdcFactory.deploy(new BigNumber(1e+18).toString(10));
     const verifier = await Groth16VerifierFactory.deploy();
-    const zkpay = await ZkPayFactory.deploy(usdc.getAddress(), verifier.getAddress());
+    const zkpay = await ZkPayFactory.deploy(usdc.getAddress(), verifier.getAddress(), "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266");
     return { usdc, zkpay, deployer, otherAccount };
   }
 
@@ -53,35 +53,37 @@ describe("zkpay", function () {
     it("Should performModification", async function () {
       const { zkpay } = await loadFixture(deployZkPayFixture);
 
+      // let ret_modificationToUint256 = await zkpay.modificationToUint256(
+      //   {
+      //     accountId: 3,
+      //     assetId: 5,
+      //     biasedDelta: -100
+      //   },
+      // );
+      // console.log('ret_modificationToUint256', ret_modificationToUint256);
 
 
-      let coder = new ethers.AbiCoder();
-      let result = coder.encode(["tuple(uint64, int128)[]"], [[[1, 100], [2, -200]]])
+      let solidity_modification_hash = await zkpay.hashModifications(
+        [
+          {
+            accountId: 3,
+            assetId: 5,
+            biasedDelta: 100
+          },
+          {
+            accountId: 3,
+            assetId: 5,
+            biasedDelta: -100
+          },
+        ]
+      );
 
-
-      let js_hash = ethers.keccak256(result);
-      console.log('js_hash', js_hash);
-
-      await zkpay.performModification([
-        {
-          accountId: 1,
-          assetId: 1,
-          biasedDelta: 100
-        },
-        {
-          accountId: 2,
-          assetId: 1,
-          biasedDelta: -200
-        }
-      ], js_hash);
-
-
-      //  let state_hash = await sm.state_hash();
-      //  console.log('state_hash', state_hash);
+      let bytes_empty_32 = '00000000000000000000000000000000';
+      let buf = Buffer.from(`${bytes_empty_32}00000003000000050000000000000064${bytes_empty_32}0000000300000005ffffffffffffff9c`, "hex");
+      let js_hash = ethers.keccak256(buf);
+      expect(solidity_modification_hash).to.equal(js_hash)
 
     });
   });
 
 });
-
-

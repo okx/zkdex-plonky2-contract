@@ -164,7 +164,7 @@ contract ZkPay is MainStorage, Freezable {
         uint[2] calldata _pA,
         uint[2][2] calldata _pB,
         uint[2] calldata _pC,
-        uint[196] calldata _pubSignals,
+        uint[178] calldata _pubSignals,
         uint256[] calldata publicInput, // TODO: to be extracted from _pubSignals
         Modification[] calldata modifications
     ) external virtual notFrozen onlyOperator {
@@ -208,7 +208,7 @@ contract ZkPay is MainStorage, Freezable {
     ) public returns (bytes32 requestHash) {
         uint256 nModifications = modifications.length;
 
-        bytes32 requestHash = keccak256(abi.encode(modifications));
+        bytes32 requestHash = hashModifications(modifications);
         require(requestHash == modificationHash, "modification hash not match");
 
         for (uint256 i = 0; i < nModifications; i++) {
@@ -226,6 +226,32 @@ contract ZkPay is MainStorage, Freezable {
                 );
             }
         }
+    }
+
+    function modificationToUint256(
+        Modification memory modification
+    ) public pure returns (uint256) {
+        uint256 result = uint256(modification.accountId);
+        result = (result << 32) | uint256(modification.assetId);
+        result = (result << 64) | uint256(uint64(modification.biasedDelta));
+        return result;
+    }
+
+    function hashModifications(
+        Modification[] memory modifications
+    ) public pure returns (bytes32) {
+        uint256 nModifications = modifications.length;
+
+        uint256[] memory mod_hashs =  new uint256[](nModifications);
+        for (uint i = 0; i < nModifications; i++) {
+            mod_hashs[i] = modificationToUint256(modifications[i]);
+        }
+        bytes memory result = abi.encodePacked(mod_hashs);
+
+        bytes32 requestHash = keccak256(
+           result
+        );
+        return requestHash;
     }
 
     /// @notice Transfers funds from msg.sender to the exchange.
