@@ -78,9 +78,12 @@ describe("zkpay", function () {
         ]
       );
 
+      console.log(solidity_modification_hash);
+
       let bytes_empty_32 = '00000000000000000000000000000000';
       let buf = Buffer.from(`${bytes_empty_32}00000003000000050000000000000064${bytes_empty_32}0000000300000005ffffffffffffff9c`, "hex");
       let js_hash = ethers.keccak256(buf);
+      console.log(js_hash);
       expect(solidity_modification_hash).to.equal(js_hash)
 
     });

@@ -6,10 +6,9 @@ contract MainStorage {
     address groth16VerifierAddress;
 
     // The following constants are offsets of data expected in the public input.
-    uint256 internal constant PUB_IN_BATCHID_OFFSET = 0;
-    uint256 internal constant PUB_IN_VALIDIUM_VAULT_ROOT_BEFORE_OFFSET = 1;
-    uint256 internal constant PUB_IN_VALIDIUM_VAULT_ROOT_AFTER_OFFSET = 2;
-    uint256 internal constant PUB_IN_MODIFICATION_HASH_OFFSET = 3;
+    uint256 internal constant PUB_IN_VALIDIUM_VAULT_ROOT_BEFORE_OFFSET = 0;
+    uint256 internal constant PUB_IN_VALIDIUM_VAULT_ROOT_AFTER_OFFSET = 1;
+    uint256 internal constant PUB_IN_MODIFICATION_HASH_OFFSET = 2;
 
     // Governance
     // True if and only if the address is an operator (allowed to update state).
