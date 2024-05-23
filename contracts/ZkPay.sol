@@ -167,8 +167,8 @@ contract ZkPay is MainStorage, Freezable {
         uint[178] calldata _pubSignals,
         uint256[] calldata publicInput, // TODO: to be extracted from _pubSignals
         Modification[] calldata modifications
-    ) external virtual notFrozen onlyOperator returns (bool) {
-        require(publicInput.length >= 4, "incorrect publicInput length");
+    ) external virtual notFrozen onlyOperator {
+        require(publicInput.length >= 3, "incorrect publicInput length");
         require(
             IGroth16Verifier(groth16VerifierAddress).verifyProof(
                 _pA,
@@ -180,7 +180,7 @@ contract ZkPay is MainStorage, Freezable {
         );
 
         rootUpdate(
-            publicInput[PUB_IN_BATCHID_OFFSET],
+            0,
             publicInput[PUB_IN_VALIDIUM_VAULT_ROOT_AFTER_OFFSET]
         );
 
@@ -188,7 +188,6 @@ contract ZkPay is MainStorage, Freezable {
             modifications,
             bytes32(publicInput[PUB_IN_MODIFICATION_HASH_OFFSET])
         );
-        return true;
     }
 
     function rootUpdate(
