@@ -242,15 +242,13 @@ contract ZkPay is MainStorage, Freezable {
     ) public pure returns (bytes32) {
         uint256 nModifications = modifications.length;
 
-        uint256[] memory mod_hashs =  new uint256[](nModifications);
+        uint256[] memory mod_hashs = new uint256[](nModifications);
         for (uint i = 0; i < nModifications; i++) {
             mod_hashs[i] = modificationToUint256(modifications[i]);
         }
         bytes memory result = abi.encodePacked(mod_hashs);
 
-        bytes32 requestHash = keccak256(
-           result
-        );
+        bytes32 requestHash = keccak256(result);
         return requestHash;
     }
 
