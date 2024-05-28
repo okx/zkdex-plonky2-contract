@@ -1,8 +1,8 @@
 Arguments: 
-  /Users/yangweitao/.nvm/versions/node/v18.20.2/bin/node /Users/yangweitao/.nvm/versions/node/v16.20.2/bin/yarn build
+  /Users/yangweitao/.nvm/versions/node/v18.20.2/bin/node /Users/yangweitao/.nvm/versions/node/v16.20.2/bin/yarn add @types/ethers
 
 PATH: 
-  /Users/yangweitao/.nvm/versions/node/v18.20.2/bin:/Users/yangweitao/.nvm/versions/node/v21.0.0/bin:/Users/yangweitao/.nvm/versions/node/v16.20.2/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/go/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/Users/yangweitao/.nvm/versions/node/v16.20.2/bin:/Users/yangweitao/anaconda3/bin:/Users/yangweitao/anaconda3/condabin:/opt/homebrew/bin:/opt/homebrew/sbin:/Users/yangweitao/.cargo/bin
+  /Users/yangweitao/.nvm/versions/node/v18.20.2/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/go/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/Users/yangweitao/.nvm/versions/node/v16.20.2/bin:/Users/yangweitao/anaconda3/bin:/Users/yangweitao/anaconda3/condabin:/opt/homebrew/bin:/opt/homebrew/sbin:/Users/yangweitao/.cargo/bin:/Users/yangweitao/.foundry/bin
 
 Yarn version: 
   1.22.19
@@ -14,21 +14,21 @@ Platform:
   darwin arm64
 
 Trace: 
-  TypeError [ERR_INVALID_ARG_VALUE]: The argument 'file' cannot be empty. Received ''
-      at new NodeError (node:internal/errors:405:5)
-      at normalizeSpawnArguments (node:child_process:552:11)
-      at Object.spawn (node:child_process:754:13)
-      at /Users/yangweitao/.nvm/versions/node/v16.20.2/lib/node_modules/yarn/lib/cli.js:25732:24
-      at new Promise (<anonymous>)
-      at new F (/Users/yangweitao/.nvm/versions/node/v16.20.2/lib/node_modules/yarn/lib/cli.js:5305:28)
-      at /Users/yangweitao/.nvm/versions/node/v16.20.2/lib/node_modules/yarn/lib/cli.js:25729:12
-      at run (/Users/yangweitao/.nvm/versions/node/v16.20.2/lib/node_modules/yarn/lib/cli.js:43184:7)
-      at BlockingQueue.maybePushConcurrencyQueue (/Users/yangweitao/.nvm/versions/node/v16.20.2/lib/node_modules/yarn/lib/cli.js:43199:7)
-      at BlockingQueue.shift (/Users/yangweitao/.nvm/versions/node/v16.20.2/lib/node_modules/yarn/lib/cli.js:43194:10)
+  Error: https://registry.yarnpkg.com/@types%2fethers: Not found
+      at params.callback [as _callback] (/Users/yangweitao/.nvm/versions/node/v16.20.2/lib/node_modules/yarn/lib/cli.js:66145:18)
+      at self.callback (/Users/yangweitao/.nvm/versions/node/v16.20.2/lib/node_modules/yarn/lib/cli.js:140890:22)
+      at Request.emit (node:events:517:28)
+      at Request.<anonymous> (/Users/yangweitao/.nvm/versions/node/v16.20.2/lib/node_modules/yarn/lib/cli.js:141862:10)
+      at Request.emit (node:events:517:28)
+      at IncomingMessage.<anonymous> (/Users/yangweitao/.nvm/versions/node/v16.20.2/lib/node_modules/yarn/lib/cli.js:141784:12)
+      at Object.onceWrapper (node:events:631:28)
+      at IncomingMessage.emit (node:events:529:35)
+      at endReadableNT (node:internal/streams/readable:1400:12)
+      at process.processTicksAndRejections (node:internal/process/task_queues:82:21)
 
 npm manifest: 
   {
-    "name": "zkdex-plonky2-contract",
+    "name": "zkpay-plonky2-contract",
     "version": "1.0.0",
     "description": "",
     "main": "index.js",
@@ -43,14 +43,14 @@ npm manifest:
     },
     "repository": {
       "type": "git",
-      "url": "git+https://github.com/okx/zkdex-plonky2-contract.git"
+      "url": "git+https://github.com/okx/zkpay-plonky2-contract.git"
     },
     "author": "",
     "license": "ISC",
     "bugs": {
-      "url": "https://github.com/okx/zkdex-plonky2-contract/issues"
+      "url": "https://github.com/okx/zkpay-plonky2-contract/issues"
     },
-    "homepage": "https://github.com/okx/zkdex-plonky2-contract#readme",
+    "homepage": "https://github.com/okx/zkpay-plonky2-contract#readme",
     "devDependencies": {
       "@nomicfoundation/hardhat-chai-matchers": "^2.0.6",
       "@nomicfoundation/hardhat-ethers": "^3.0.5",
@@ -60,6 +60,7 @@ npm manifest:
       "@nomicfoundation/hardhat-toolbox": "^5.0.0",
       "@nomicfoundation/hardhat-verify": "^2.0.6",
       "@nomicfoundation/ignition-core": "^0.15.2",
+      "@nomiclabs/hardhat-etherscan": "^3.1.2",
       "@openzeppelin/contracts": "^5.0.2",
       "@typechain/ethers-v6": "^0.5.1",
       "@typechain/hardhat": "^9.1.0",
@@ -785,6 +786,22 @@ Lockfile:
       "@nomicfoundation/solidity-analyzer-win32-arm64-msvc" "0.1.1"
       "@nomicfoundation/solidity-analyzer-win32-ia32-msvc" "0.1.1"
       "@nomicfoundation/solidity-analyzer-win32-x64-msvc" "0.1.1"
+  
+  "@nomiclabs/hardhat-etherscan@^3.1.2":
+    version "3.1.8"
+    resolved "https://registry.yarnpkg.com/@nomiclabs/hardhat-etherscan/-/hardhat-etherscan-3.1.8.tgz#3c12ee90b3733e0775e05111146ef9418d4f5a38"
+    integrity sha512-v5F6IzQhrsjHh6kQz4uNrym49brK9K5bYCq2zQZ729RYRaifI9hHbtmK+KkIVevfhut7huQFEQ77JLRMAzWYjQ==
+    dependencies:
+      "@ethersproject/abi" "^5.1.2"
+      "@ethersproject/address" "^5.0.2"
+      cbor "^8.1.0"
+      chalk "^2.4.2"
+      debug "^4.1.1"
+      fs-extra "^7.0.1"
+      lodash "^4.17.11"
+      semver "^6.3.0"
+      table "^6.8.0"
+      undici "^5.14.0"
   
   "@openzeppelin/contracts@^5.0.2":
     version "5.0.2"
