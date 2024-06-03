@@ -5,5 +5,9 @@ deposit, transfer, transfer, withdraw
 pub input size: 178
 gas used: 1504396
 
-
+## 2
+zkpay commit d03a22654071905bdfbf40bd9e85783282f18b05
+change: remove fri config on gl last recursive
+pub input size: 118
+gas used: 777703
 
